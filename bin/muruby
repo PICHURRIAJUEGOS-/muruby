@@ -111,7 +111,9 @@ module Build
                  'mrbgems/mruby-print',
                  'mrbgems/mruby-bin-mirb',
                  'mrbgems/mruby-bin-mruby'
-                ] | gems_common | ['pichurriaj/mruby-require']
+                ] | gems_common | [
+                                   { :github => 'pichurriaj/mruby-require', :branch => 'muruby'}
+                                  ]
     
     gems_android = [
                     {
