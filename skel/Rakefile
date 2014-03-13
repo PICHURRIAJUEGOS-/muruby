@@ -106,9 +106,11 @@ return 0; //not loaded
       }
 
       fgame_c = File.new(game_c, "a")
-c_func_muruby_game_require = "muruby_game_require"
+#This simulate Kernel#load
+#very simple it load and run +file+ passed
+c_func_muruby_game_load = "muruby_game_kernel_load"
 #KERNEL#REQUIRE
-fgame_c << "mrb_value #{c_func_muruby_game_require}(mrb_state *mrb, mrb_value self) {
+fgame_c << "mrb_value #{c_func_muruby_game_load}(mrb_state *mrb, mrb_value self) {
 mrb_value file;
 mrb_get_args(mrb, \"o\", &file);
 if(!mrb_string_p(file)) mrb_raise(mrb, E_ARGUMENT_ERROR, \"Need String\");
@@ -128,7 +130,7 @@ fgame_c << "void muruby_game_load(mrb_state *mrb, mrbc_context* cxt){
   krn = mrb->kernel_module;
 "
 #define methods mrb
-fgame_c << " mrb_define_method(mrb, krn, \"require\", #{c_func_muruby_game_require}, MRB_ARGS_REQ(1));\n"
+fgame_c << " mrb_define_method(mrb, krn, \"require\", #{c_func_muruby_game_load}, MRB_ARGS_REQ(1));\n"
 #load Runtime
 fgame_c << ' cxt_global = cxt; '
 fgame_c << ' game_runtime_load(mrb); '
