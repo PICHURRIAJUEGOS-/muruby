@@ -163,14 +163,14 @@ namespace :ant do
   desc "Create apk debug"
   task :debug => ['muruby:android:build'] do
     Dir.chdir(android_build_path) do
-      sh 'cp -ra %s/ assets/' % resource_root
+      sh 'cp -ra %s/* assets/' % resource_root
       sh "ant debug"
     end
   end
   desc "Create apk release"
   task :release => ['muruby:android:build'] do
     Dir.chdir(android_build_path) do
-      sh 'cp -ra %s/ assets/' % resource_root
+      sh 'cp -ra %s/* assets/' % resource_root
       sh "ant release"
     end
   end
