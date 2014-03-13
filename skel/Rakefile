@@ -70,12 +70,12 @@ namespace :muruby do
       fgame_c.close
       game_files = []
       FileList[File.join(game_root,'*.rb')].each { |ruby_file|
-        basename = File.basename(ruby_file);
+        basename_ruby_file = File.basename(ruby_file,'.rb').gsub(/[^a-zA-Z0-9]+/,"_");
         game_file = {}
         name_for_require = 'game_'
-        name_for_require += File.basename(ruby_file).to_s.chomp(File.extname(File.basename(ruby_file)))
+        name_for_require += basename_ruby_file.to_s.chomp(File.extname(basename_ruby_file))
         game_file[:name_for_require] = name_for_require
-        game_file[:name] = File.basename(ruby_file).to_s.chomp(File.extname(File.basename(ruby_file)))
+        game_file[:name] = basename_ruby_file.to_s.chomp(File.extname(basename_ruby_file))
         c_var_loaded = "%s_loaded" % name_for_require
 
         sh "%s -B%s -o- %s >> %s" % [mruby_mrbc, name_for_require, ruby_file, game_c]
@@ -88,7 +88,7 @@ namespace :muruby do
         int #{c_func_load_name}(mrb_state* mrb) {
         if(!#{c_var_loaded}) {
            cxt_global->capture_errors = 1; cxt_global->lineno = 1;
-           cxt_global->filename = \"#{basename}\";
+           cxt_global->filename = \"#{basename_ruby_file}\";
  int ai = mrb_gc_arena_save(mrb);
  mrb_value irep = mrb_load_irep_cxt(mrb, #{name_for_require}, cxt_global);
  mrb_gc_arena_restore(mrb, ai);
