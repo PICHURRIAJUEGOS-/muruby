@@ -130,7 +130,7 @@ fgame_c << "void muruby_game_load(mrb_state *mrb, mrbc_context* cxt){
   krn = mrb->kernel_module;
 "
 #define methods mrb
-fgame_c << " mrb_define_method(mrb, krn, \"require\", #{c_func_muruby_game_load}, MRB_ARGS_REQ(1));\n"
+fgame_c << " mrb_define_method(mrb, krn, \"load\", #{c_func_muruby_game_load}, MRB_ARGS_REQ(1));\n"
 #load Runtime
 fgame_c << ' cxt_global = cxt; '
 fgame_c << ' game_runtime_load(mrb); '

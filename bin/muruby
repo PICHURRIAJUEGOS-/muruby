@@ -113,7 +113,7 @@ module Build
                       
                     },
                     {
-                      :github => 'Qard/mruby-print-android',
+                      :github => 'pichurriaj/mruby-print-android',
                       :branch => 'master'
                     },
                     'mrbgems/mruby-math',
@@ -357,7 +357,7 @@ module Muruby
       empty_directory "#{name}/app"
       empty_directory "#{name}/app/game"
       copy_file "doc/README_game.md", "#{name}/app/game/README.md"
-
+      copy_file "game/runtime.rb", "#{name}/app/game/runtime.rb"
       empty_directory "#{name}/app/resources"
       copy_file "doc/README_resources.md", "#{name}/app/resources/README.md"
 
