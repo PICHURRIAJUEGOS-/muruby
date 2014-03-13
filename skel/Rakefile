@@ -70,6 +70,7 @@ namespace :muruby do
       fgame_c.close
       game_files = []
       FileList[File.join(game_root,'*.rb')].each { |ruby_file|
+        name_ruby_file = File.basename(ruby_file)
         basename_ruby_file = File.basename(ruby_file,'.rb').gsub(/[^a-zA-Z0-9]+/,"_");
         game_file = {}
         name_for_require = 'game_'
@@ -78,7 +79,8 @@ namespace :muruby do
         game_file[:name] = basename_ruby_file.to_s.chomp(File.extname(basename_ruby_file))
         c_var_loaded = "%s_loaded" % name_for_require
 
-        sh "%s -B%s -o- %s >> %s" % [mruby_mrbc, name_for_require, ruby_file, game_c]
+        #@todo how option debug disable??
+        sh "%s -B%s -g -o- %s >> %s" % [mruby_mrbc, name_for_require, ruby_file, game_c]
         fgame_c = File.new(game_c, "a")
         fgame_c << "static int %s = 0;\n" % c_var_loaded
         #variable:C flag
@@ -87,12 +89,15 @@ namespace :muruby do
         c_func_load = "
         int #{c_func_load_name}(mrb_state* mrb) {
         if(!#{c_var_loaded}) {
-           cxt_global->capture_errors = 1; cxt_global->lineno = 1;
-           cxt_global->filename = \"#{basename_ruby_file}\";
+mrbc_context* cxt = mrbc_context_new(mrb);
+mrbc_filename(mrb, cxt, \"#{name_ruby_file}\");
+           cxt->capture_errors = 1;
+           cxt->filename = \"#{name_ruby_file}\";
  int ai = mrb_gc_arena_save(mrb);
- mrb_value irep = mrb_load_irep_cxt(mrb, #{name_for_require}, cxt_global);
+ mrb_value irep = mrb_load_irep_cxt(mrb, #{name_for_require}, cxt);
  mrb_gc_arena_restore(mrb, ai);
  #{c_var_loaded} = 1;
+mrbc_context_free(mrb,cxt);
  return 1; //loaded
  } 
 return 0; //not loaded

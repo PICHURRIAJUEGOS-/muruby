@@ -18,6 +18,7 @@
 #include <mruby/compile.h>
 #include <mruby/variable.h>
 
+
 #ifdef __ANDROID__
 #include <android/log.h>
 #ifdef printf
@@ -156,14 +157,12 @@ main(int argc, char *argv[])
   cxt = mrbc_context_new(mrb);
   muruby_game_load(mrb, cxt);
   if(mrb->exc) {
-      mrb_output_backtrace_android(mrb, mrb->exc, print_backtrace_android_i, (void*)stderr);
+    mrb_output_backtrace_android(mrb, mrb->exc, print_backtrace_android_i, (void*)stderr);
     mrb_value ex = mrb_funcall(mrb, mrb_obj_value(mrb->exc), "inspect", 0);
     if(mrb_type(ex) == MRB_TT_STRING) {
-
-      SDL_Log("RUBY EXCEPTION: %s", RSTRING_PTR(ex));
-    }else{
-      SDL_Log("RUBY EXCEPTION OCURRED");
+      SDL_Log("MRUBY EXCEPTION: %s", RSTRING_PTR(ex));
     }
+    
   }
   mrbc_context_free(mrb, cxt);
   mrb_close(mrb);
