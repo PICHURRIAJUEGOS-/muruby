@@ -84,6 +84,20 @@ module Build
   
 
   def _configure_mruby(app, mruby_path)
+    gems_common = [
+                   'mrbgems/mruby-math',
+                   'mrbgems/mruby-enum-ext',
+                   'mrbgems/mruby-random',
+                   'mrbgems/mruby-proc-ext',
+                   'mrbgems/mruby-exit',
+                   'mrbgems/mruby-fiber',
+                   'mrbgems/mruby-struct',
+                   'mrbgems/mruby-sprintf',
+                   'mrbgems/mruby-string-ext',
+                   'mrbgems/mruby-object-ext',
+                   'mrbgems/mruby-array-ext',
+                   'mrbgems/mruby-symbol-ext'
+                  ]
     gems_base = [
                  {
                    :github => 'pichurriaj/mruby-sdl2',
@@ -97,8 +111,8 @@ module Build
                  'mrbgems/mruby-print',
                  'mrbgems/mruby-bin-mirb',
                  'mrbgems/mruby-bin-mruby'
-                ]
-
+                ] | gems_common | ['pichurriaj/mruby-require']
+    
     gems_android = [
                     {
                       :github => 'pichurriaj/mruby-sdl2',
@@ -115,20 +129,8 @@ module Build
                     {
                       :github => 'pichurriaj/mruby-print-android',
                       :branch => 'master'
-                    },
-                    'mrbgems/mruby-math',
-                    'mrbgems/mruby-enum-ext',
-                    'mrbgems/mruby-random',
-                    'mrbgems/mruby-proc-ext',
-                    'mrbgems/mruby-exit',
-                    'mrbgems/mruby-fiber',
-                    'mrbgems/mruby-struct',
-                    'mrbgems/mruby-sprintf',
-                    'mrbgems/mruby-string-ext',
-                    'mrbgems/mruby-object-ext',
-                    'mrbgems/mruby-array-ext',
-                    'mrbgems/mruby-symbol-ext'
-                ]
+                    }
+                ] | gems_common
 
     _configure_mruby_host(mruby_path, gems_base)
     _configure_mruby_android(mruby_path, gems_android)
