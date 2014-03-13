@@ -150,7 +150,7 @@ module Build
   end
   
   def _configure_mruby_android(mruby_path, gems_base)
-    key_to_append = "#AUTOMATIC GEMS --NO EDIT--\n"
+    key_to_append = "#AUTOMATIC GEMS ANDROID --NO EDIT--\n"
     insert_into_file File.join(mruby_path, 'build_config.rb'), :after => "# Define cross build settings\n" do
       out = "#AUTOMATIC CROSSBUILD ANDROID\n"
       out += "MRuby::CrossBuild.new('androideabi') do |conf|\n"
@@ -159,10 +159,9 @@ module Build
       out += "conf.bins = []\n"
       out += key_to_append
       out += "end\n"
-      _mruby_update_build_conf(mruby_path, gems_base, key_to_append)
       out
     end
-
+    _mruby_update_build_conf(mruby_path, gems_base, key_to_append)
 
     inside(mruby_path) do
       run("ruby minirake")
@@ -175,23 +174,31 @@ module Build
     
     sdl_android_path = File.join(build_android_path, 'jni', 'SDL')
     repo('curl').clone(sdl_android_path, $HG_REPO_SDL2['SDL'])  unless File.directory?(sdl_android_path)
-    sdl_image_android_path = File.join(build_android_path, 'jni', 'SDL_image')
-    repo('curl').clone(sdl_image_android_path, $HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_android_path)
-    sdl_image_android_path_mk = File.join(sdl_image_android_path, 'Android.mk')
-    gsub_file sdl_image_android_path_mk, "SUPPORT_WEBP := true", "SUPPORT_WEBP := false"
     
-    sdl_ttf_android_path = File.join(build_android_path, 'jni', 'SDL_ttf')
-    repo('curl').clone(sdl_ttf_android_path, $HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_android_path)
-    sdl_ttf_android_path_mk = File.join(sdl_ttf_android_path, 'Android.mk')
-    gsub_file sdl_ttf_android_path_mk, "SUPPORT_JPG := true", "SUPPORT_JPG := false"
-    sdl_mixer_android_path = File.join(build_android_path, 'jni', 'SDL_mixer')
-    repo('curl').clone(sdl_mixer_android_path, $HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_android_path)
+    if options[:enable_sdl_image]
+      sdl_image_android_path = File.join(build_android_path, 'jni', 'SDL_image')
+      repo('curl').clone(sdl_image_android_path, $HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_android_path)
+      sdl_image_android_path_mk = File.join(sdl_image_android_path, 'Android.mk')
+      gsub_file sdl_image_android_path_mk, "SUPPORT_WEBP := true", "SUPPORT_WEBP := false"
+    end
     
-    sdl_mixer_android_path_mk = File.join(sdl_mixer_android_path, 'Android.mk')
-    gsub_file sdl_mixer_android_path_mk, "SUPPORT_MOD_MODPLUG := true", "SUPPORT_MOD_MODPLUG := false"
-    gsub_file sdl_mixer_android_path_mk, "SUPPORT_MOD_MIKMOD := true", "SUPPORT_MOD_MIKMOD := false"
-    gsub_file sdl_mixer_android_path_mk, "SUPPORT_MP3_SMPEG := true", "SUPPORT_MP3_SMPEG := false"
-
+    if options[:enable_sdl_ttf]
+      sdl_ttf_android_path = File.join(build_android_path, 'jni', 'SDL_ttf')
+      repo('curl').clone(sdl_ttf_android_path, $HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_android_path)
+      sdl_ttf_android_path_mk = File.join(sdl_ttf_android_path, 'Android.mk')
+      gsub_file sdl_ttf_android_path_mk, "SUPPORT_JPG := true", "SUPPORT_JPG := false"
+    end
+    
+    if options[:enable_sdl_mixer]
+      sdl_mixer_android_path = File.join(build_android_path, 'jni', 'SDL_mixer')
+      repo('curl').clone(sdl_mixer_android_path, $HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_android_path)
+    
+      sdl_mixer_android_path_mk = File.join(sdl_mixer_android_path, 'Android.mk')
+      gsub_file sdl_mixer_android_path_mk, "SUPPORT_MOD_MODPLUG := true", "SUPPORT_MOD_MODPLUG := false"
+      gsub_file sdl_mixer_android_path_mk, "SUPPORT_MOD_MIKMOD := true", "SUPPORT_MOD_MIKMOD := false"
+      gsub_file sdl_mixer_android_path_mk, "SUPPORT_MP3_SMPEG := true", "SUPPORT_MP3_SMPEG := false"
+    end
+    
 
   end
 
@@ -214,6 +221,7 @@ module Build
             }.join("\n")
             out += "\nend\n"
           end
+          out
         when String
           "conf.gem '%s'" % gem
         end
@@ -330,7 +338,9 @@ module Muruby
       File.dirname(__FILE__)
     end
 
-
+    class_option :enable_sdl_mixer, :type => :boolean, :default => false, :desc => "Not Implemented yet"
+    class_option :enable_sdl_ttf, :type => :boolean, :default => false, :desc => "Not implemented yet"
+    class_option :enable_sdl_image, :type => :boolean, :default => false, :desc => "Not implemented yet"
     method_option :package, :type => :string, :default => 'com.pichurriajuegos.muruby', :required => true, :banner => 'ej: com.pichurriajuegos.muruby the package'
     desc 'create <app>', "Create a directory <name> structure with everything need for creating games for Android, and GNU/Linux.
 "
@@ -372,11 +382,11 @@ module Muruby
       sdl_path = "#{name}/core/SDL2"
       repo('curl').clone(sdl_path, $HG_REPO_SDL2['SDL']) unless File.directory?(sdl_path)
       sdl_image_path = "#{name}/core/SDL2_image"
-      repo('curl').clone(sdl_image_path, $HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_path)
+      repo('curl').clone(sdl_image_path, $HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_path) if options[:enable_sdl_image]
       sdl_ttf_path = "#{name}/core/SDL2_ttf"
-      repo('curl').clone(sdl_ttf_path, $HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_path)
+      repo('curl').clone(sdl_ttf_path, $HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_path) if options[:enable_sdl_ttf]
       sdl_mixer_path = "#{name}/core/SDL2_mixer"
-      repo('curl').clone(sdl_mixer_path, $HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_path)
+      repo('curl').clone(sdl_mixer_path, $HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_path) if options[:enable_sdl_mixer]
 
       
       mruby_path = "#{name}/core/mruby"
@@ -388,10 +398,11 @@ module Muruby
       #mruby-require
 
       #configure apps
+
       _configure_sdl2(name, sdl_path)
-      _configure_sdl2_image(name, sdl_path,  sdl_image_path)
-      _configure_sdl2_ttf(name, sdl_path, sdl_ttf_path)
-      _configure_sdl2_mixer(name, sdl_path, sdl_mixer_path)
+      _configure_sdl2_image(name, sdl_path,  sdl_image_path) if options[:enable_sdl_image]
+      _configure_sdl2_ttf(name, sdl_path, sdl_ttf_path) if options[:enable_sdl_ttf]
+      _configure_sdl2_mixer(name, sdl_path, sdl_mixer_path) if options[:enable_sdl_mixer]
 
       _configure_mruby(name, mruby_path)
     end
