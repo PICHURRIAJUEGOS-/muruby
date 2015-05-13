@@ -1,10 +1,10 @@
-===MURUBY
+# MURUBY
 Motor para realizacion de video juegos con soporte para: Android >= 2.3, GNU/Linux.
 
 Utilizando como lenguaje de scripting *mruby*.
 Y principalmente el *mrgem* *SDL2*.
 
-==TUTORIAL
+## TUTORIAL
 
   * Clonar el repositorio: "git clone https://www.github.com/pichurriaj/muruby"
   * Compilar el gem e instalar
@@ -16,7 +16,7 @@ Y principalmente el *mrgem* *SDL2*.
   * el core o lo necesario para funcionar esta en core/*
   * para mirar las opciones de compilacion e instalacion, en la carpeta *app/* ejecutar *rake -T*
 
-== MULTI-PROYECTOS
+## MULTI-PROYECTOS
 
   * Crear directorio **proyectos/**
     * crear Gemfile con
@@ -37,7 +37,7 @@ Y principalmente el *mrgem* *SDL2*.
 	  ~~~
 	  
 	  
-== REQUERIMIENTOS
+## REQUERIMIENTOS
 
   * ANDROID-NDK con toolchain
     * $ANDROID_NDK_HOME/build/tools/make-standalone-toolchain.sh --platform=android-14 --install-dir=$HOME/android-14-toolchain
@@ -45,9 +45,9 @@ Y principalmente el *mrgem* *SDL2*.
     * export NDK_ROOT=$HOME/android-14-toolchain
 	* export PATH="$NDK_ROOT/bin:$PATH"
   
-==TODO
+## TODO
 
-=== DEPURAR
+### DEPURAR
 
 Actualmente es funcional, pero la depuracion se realiza utilizando el *logcat*, no hay
 forma de depurar correctamente, detener, mirar la pila, memoria, codigo, etc..
