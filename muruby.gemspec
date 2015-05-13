@@ -14,5 +14,7 @@ Gem::Specification.new do |s|
   s.homepage = ''
   s.license = 'MIT'
   s.add_development_dependency "rspec"
+  s.add_development_dependency "thor"
+  s.add_development_dependency "gettext"
   s.executables << "muruby"
 end

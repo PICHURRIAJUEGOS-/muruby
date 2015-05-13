@@ -24,7 +24,13 @@ end
 
 namespace :muruby do
   namespace :game do
-    desc "Run the game on the host (testing) pass <filename .rb> for run specific file"
+    
+    desc "irb muruby on the host (development)"
+    task :shell do
+      sh("LD_LIBRARY_PATH=%s; %s %s" % [File.dirname(sdl_so), mruby_mruby, main_rb])
+    end
+
+    desc "Run the game on the host (development) pass <filename .rb> for run specific file"
     task :run, [:file]  => [sdl_so] do
       main_rb = 'runtime.rb'
       if(ARGV[1])

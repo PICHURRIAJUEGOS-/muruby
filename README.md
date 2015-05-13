@@ -16,8 +16,39 @@ Y principalmente el *mrgem* *SDL2*.
   * el core o lo necesario para funcionar esta en core/*
   * para mirar las opciones de compilacion e instalacion, en la carpeta *app/* ejecutar *rake -T*
 
+== MULTI-PROYECTOS
+
+  * Crear directorio **proyectos/**
+    * crear Gemfile con
+	  ~~~ruby
+	  source 'https://rubygems.org'
+	  gem 'rake'
+	  gem 'thor'
+	  gem 'gettext'
+	  gem 'muruby', github: 'pichurriaj/muruby'
+	  ~~~
+    * instalar
+	  ~~~bash
+	  $ bundle install
+	  ~~~
+	* ejecutar y crear proyectos
+	  ~~~bash
+	  $ bundle exec muruby create miproyecto1
+	  ~~~
+	  
+	  
+== REQUERIMIENTOS
+
+  * ANDROID-NDK con toolchain
+    * $ANDROID_NDK_HOME/build/tools/make-standalone-toolchain.sh --platform=android-14 --install-dir=$HOME/android-14-toolchain
+  * variable de entorno 
+    * export NDK_ROOT=$HOME/android-14-toolchain
+	* export PATH="$NDK_ROOT/bin:$PATH"
+  
 ==TODO
+
 === DEPURAR
+
 Actualmente es funcional, pero la depuracion se realiza utilizando el *logcat*, no hay
 forma de depurar correctamente, detener, mirar la pila, memoria, codigo, etc..
 hace falta un buen depurador; 
