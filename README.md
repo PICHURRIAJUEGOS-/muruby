@@ -69,3 +69,10 @@ hace falta un buen depurador;
 algunos proyectos base:
   * mruby-mdebug
   * mruby-debugger
+
+
+## Gracias
+
+  * crimsonwoods/mruby-sdl2
+  * mruby/mruby
+  * y todos por contribuir y compartir el software libre.  
