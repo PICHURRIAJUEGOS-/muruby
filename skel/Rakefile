@@ -9,6 +9,7 @@ sdl_path = File.absolute_path File.join(core_path, 'SDL2')
 mruby_path = File.absolute_path File.join(core_path, 'mruby')
 mruby_android_path = File.absolute_path File.join(mruby_path, 'build', 'androideabi')
 mruby_mrbc = File.absolute_path File.join('..', 'core', 'mruby', 'build', 'host', 'bin', 'mrbc')
+mruby_mirb = File.absolute_path File.join('..', 'core', 'mruby', 'build', 'host', 'bin', 'mirb')
 mruby_mruby = File.absolute_path File.join('../', 'core', 'mruby', 'build', 'host', 'bin', 'mruby')
 sdl_root = File.absolute_path(File.join('../', 'core', 'SDL2'))
 sdl_so = File.join(core_path, 'build_host', 'lib', 'libSDL2.so')
@@ -27,7 +28,7 @@ namespace :muruby do
     
     desc "irb muruby on the host (development)"
     task :shell do
-      sh("LD_LIBRARY_PATH=%s; %s %s" % [File.dirname(sdl_so), mruby_mruby, main_rb])
+      sh("LD_LIBRARY_PATH=%s; %s" % [File.dirname(sdl_so), mruby_mirb])
     end
 
     desc "Run the game on the host (development) pass <filename .rb> for run specific file"
