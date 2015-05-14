@@ -4,6 +4,15 @@ Motor para realizacion de video juegos con soporte para: Android >= 2.3, GNU/Lin
 Utilizando como lenguaje de scripting *mruby*.
 Y principalmente el *mrgem* *SDL2*.
 
+## CARACTERISTICAS
+
+  * Plataforma. Android >= 2.3
+  * Plataforma. GNU/Linux
+  * Depurador **debugger**, usando **mrdb** en maquina local
+  * Depurador **shell**, usando **mirb** en maquina local 
+  * Ejecutar en maquina local
+  * **rake -T** para todas las opciones.
+  
 ## TUTORIAL
 
   * Clonar el repositorio: "git clone https://www.github.com/pichurriaj/muruby"
@@ -20,21 +29,26 @@ Y principalmente el *mrgem* *SDL2*.
 
   * Crear directorio **proyectos/**
     * crear Gemfile con
-	  ~~~ruby
+
+~~~ruby
 	  source 'https://rubygems.org'
 	  gem 'rake'
 	  gem 'thor'
 	  gem 'gettext'
 	  gem 'muruby', github: 'pichurriaj/muruby'
-	  ~~~
+~~~
+	  
     * instalar
-	  ~~~bash
-	  $ bundle install
-	  ~~~
+	
+~~~bash
+ $ bundle install
+~~~
+ 
 	* ejecutar y crear proyectos
-	  ~~~bash
+	
+~~~bash
 	  $ bundle exec muruby create miproyecto1
-	  ~~~
+~~~
 	  
 	  
 ## REQUERIMIENTOS

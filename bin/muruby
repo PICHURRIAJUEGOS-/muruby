@@ -165,8 +165,8 @@ module Build
   
  
   def _configure_mruby_host(mruby_path, gems_base)
-    #configure host building
-    _mruby_update_build_conf(mruby_path, gems_base, "MRuby::Build.new do |conf|\n")
+    _mruby_update_build_conf(mruby_path, gems_base, "MRuby::Build.new do |conf|\n", "#AUTOMATIC MRBGEMS --NO EDIT--\n")
+    _mruby_update_build_conf(mruby_path, gems_base, "MRuby::Build.new('host-debug') do |conf|\n", "#AUTOMATIC MRBGEMS DEBUG --NO EDIT--\n")
   end
   
   def _configure_mruby_android(mruby_path, gems_base)
@@ -181,7 +181,7 @@ module Build
       out += "end\n"
       out
     end
-    _mruby_update_build_conf(mruby_path, gems_base, key_to_append)
+    _mruby_update_build_conf(mruby_path, gems_base, key_to_append, "#AUTOMATIC ANDROID MBRGEMS\n")
 
 
     #copy skel android projct
@@ -220,12 +220,14 @@ module Build
   end
 
   
-   def _mruby_update_build_conf(mruby_path, gems_base, after)
+  def _mruby_update_build_conf(mruby_path, gems_base, after, tag = "")
+
     insert_into_file File.join(mruby_path,"build_config.rb"), :after => after do
       gems_base.map do |gem|
         case gem
-        when Hash 
-          out = "conf.gem :github => '%s', :branch => '%s' " % [gem[:github], gem[:branch]]
+        when Hash
+          out = tag
+          out += "\nconf.gem :github => '%s', :branch => '%s' " % [gem[:github], gem[:branch]]
           if gem[:cc]
             out += "do |g|\n"
             out += gem[:cc].map{|k,v|

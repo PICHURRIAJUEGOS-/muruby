@@ -10,6 +10,7 @@ mruby_path = File.absolute_path File.join(core_path, 'mruby')
 mruby_android_path = File.absolute_path File.join(mruby_path, 'build', 'androideabi')
 mruby_mrbc = File.absolute_path File.join('..', 'core', 'mruby', 'build', 'host', 'bin', 'mrbc')
 mruby_mirb = File.absolute_path File.join('..', 'core', 'mruby', 'build', 'host', 'bin', 'mirb')
+mruby_mrdb = File.absolute_path File.join('..', 'core', 'mruby', 'build', 'host-debug', 'bin', 'mrdb')
 mruby_mruby = File.absolute_path File.join('../', 'core', 'mruby', 'build', 'host', 'bin', 'mruby')
 sdl_root = File.absolute_path(File.join('../', 'core', 'SDL2'))
 sdl_so = File.join(core_path, 'build_host', 'lib', 'libSDL2.so')
@@ -31,11 +32,28 @@ namespace :muruby do
       sh("LD_LIBRARY_PATH=%s; %s" % [File.dirname(sdl_so), mruby_mirb])
     end
 
-    desc "Run the game on the host (development) pass <filename .rb> for run specific file"
-    task :run, [:file]  => [sdl_so] do
+    desc "Run debugger on the host (development) pass <filename .rb> for run specific file"
+    task :debug, [:file]  => [sdl_so] do |t, args|
       main_rb = 'runtime.rb'
-      if(ARGV[1])
-        main_rb = ARGV[1]
+      if(args[:file])
+        main_rb = args[:file]
+      end
+      
+      FileUtils.rm_rf '.debug_run'
+      mkdir '.debug_run'
+      Dir.chdir('.debug_run') do
+        sh 'cp %s .' % [File.join(game_root, '*.rb')]
+        sh 'cp %s .' % File.join(resource_root, '*')
+        sh("LD_LIBRARY_PATH=%s; %s  %s" % [File.dirname(sdl_so), mruby_mrdb, main_rb])
+      end
+      rmdir '.debug_run'
+    end
+
+    desc "Run the game on the host (development) pass <filename .rb> for run specific file"
+    task :run, [:file]  => [sdl_so] do |t, args|
+      main_rb = 'runtime.rb'
+      if(args[:file])
+        main_rb = args[:file]
       end
       
       FileUtils.rm_rf '.test_run'
