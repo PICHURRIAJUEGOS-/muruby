@@ -1,6 +1,10 @@
-#This compile the project for android
-game_root = File.absolute_path(File.join('./', 'game'))
-resource_root = File.absolute_path(File.join('./', 'resources'))
+#This compile the project for android and host
+game_root ||= ENV['GAME_DIR']
+game_root ||= File.absolute_path(File.join('./', 'game'))
+
+resource_root ||= ENV['RESOURCE_DIR']
+resource_root ||= File.absolute_path(File.join('./', 'resources'))
+
 core_path = File.absolute_path File.join('../', 'core')
 android_build_path = File.absolute_path File.join(core_path, 'build_android')
 sdl_path = File.absolute_path File.join(core_path, 'SDL2')
