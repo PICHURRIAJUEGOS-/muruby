@@ -61,6 +61,8 @@ Y principalmente el *mrgem* *SDL2*.
   
 ## TODO
 
+  * Dockerfile for faster enviroment development
+  
 ### DEPURAR
 
 Actualmente es funcional, pero la depuracion se realiza utilizando el *logcat*, no hay
