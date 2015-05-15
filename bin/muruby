@@ -356,7 +356,6 @@ module Muruby
     def create(name)
       if options[:build_android]
         abort "Need enviroment variable ANDROID_NDK_HOME" unless ENV["ANDROID_NDK_HOME"]
-        abort "Need enviroment variable NDK_ROOT" unless ENV["NDK_ROOT"]
       end
 
       @@app_path =  File.absolute_path File.join(".", name)
