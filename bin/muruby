@@ -31,9 +31,9 @@ end
 class Curl < SimpleDelegator
   include CacheDir
   
-  def clone(dir, url)
+  def clone(dir, url, options = "")
     cache_directory(File.basename(url)) { |local_file|
-      run("curl -C - %s -o %s" % [url, local_file])
+      run("curl -C - %s -o %s %s" % [url, local_file, options])
       run("tar -xzf %s" % [local_file])
       run("mv %s %s" % [File.basename(url, ".tar.gz"), dir])
     }
@@ -47,10 +47,10 @@ end
 class Git < SimpleDelegator
   include CacheDir
   
-  def clone(dir, url)
+  def clone(dir, url, options = "")
     cache_directory(File.basename(dir)) {|local_path|
-      run("git clone %s %s" % [url, local_path])
-      run("git clone %s %s" % [local_path, dir])
+      run("git clone %s %s %s" % [url, options, local_path])
+      run("git clone %s %s %s" % [local_path, options, dir])
     }
   end
   
@@ -64,10 +64,10 @@ end
 class Hg < SimpleDelegator
   include CacheDir
   
-  def clone(dir, url)
+  def clone(dir, url, options = {})
     cache_directory(File.basename(dir)) {|local_path|
-      run("hg clone %s %s" % [url, local_path])
-      run("hg clone %s %s" % [url, dir])
+      run("hg clone %s %s %s" % [url, options, local_path])
+      run("hg clone %s %s %s" % [url, options, dir])
     }
   end
   
@@ -349,6 +349,7 @@ module Muruby
     class_option :enable_sdl_mixer, :type => :boolean, :default => false, :desc => "Not Implemented yet"
     class_option :enable_sdl_ttf, :type => :boolean, :default => false, :desc => "Not implemented yet"
     class_option :enable_sdl_image, :type => :boolean, :default => false, :desc => "Not implemented yet"
+    class_option :mruby_unstable, :type => :boolean, :default => true, :desc => "Use the master of mruby"
     class_option :build_android, :type => :boolean, :default => true, :desc => "Build android"
     method_option :package, :type => :string, :default => 'com.pichurriajuegos.muruby', :required => true, :banner => 'ej: com.pichurriajuegos.muruby the package'
     desc 'create <app>', "Create a directory <name> structure with everything need for creating games for Android, and GNU/Linux.
@@ -423,6 +424,14 @@ module Muruby
         repo('git').clone(mruby_path, $GIT_REPO_MRUBY)
       end
 
+
+      inside(mruby_path) do
+        unless options[:mruby_unstable] 
+          run("git checkout 1.1.0")
+        else
+          run("git checkout master")
+        end
+      end
       #mruby-android
       #mruby-require
 

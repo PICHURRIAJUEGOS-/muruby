@@ -197,6 +197,7 @@ namespace :ant do
   desc "Create apk debug"
   task :debug => ['muruby:android:build'] do
     Dir.chdir(android_build_path) do
+      Dir.mkdir('assets') unless File.exists?('assets/')
       sh 'cp -ra %s/* assets/' % resource_root
       sh "ant debug"
     end
@@ -204,6 +205,7 @@ namespace :ant do
   desc "Create apk release"
   task :release => ['muruby:android:build'] do
     Dir.chdir(android_build_path) do
+      Dir.mkdir('assets') unless File.exists?('assets/')
       sh 'cp -ra %s/* assets/' % resource_root
       sh "ant release"
     end
