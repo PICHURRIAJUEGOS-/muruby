@@ -61,9 +61,8 @@ namespace :muruby do
       end
       
       FileUtils.rm_rf '.test_run'
-      mkdir '.test_run'
+      sh 'cp -fa %s .test_run' % [game_root]
       Dir.chdir('.test_run') do
-        sh 'cp %s .' % [File.join(game_root, '*.rb')]
         sh 'cp %s .' % File.join(resource_root, '*')
         sh("LD_LIBRARY_PATH=%s; %s %s" % [File.dirname(sdl_so), mruby_mruby, main_rb])
       end
@@ -96,16 +95,17 @@ namespace :muruby do
       fgame_c << "#include <mruby/irep.h>\n"
       fgame_c << "#include <mruby/dump.h>\n"
       fgame_c << "static mrbc_context *cxt_global;\n"
+
       fgame_c.close
       game_files = []
-      FileList[File.join(game_root,'*.rb')].each { |ruby_file|
-        name_ruby_file = File.basename(ruby_file)
-        basename_ruby_file = File.basename(ruby_file,'.rb').gsub(/[^a-zA-Z0-9]+/,"_");
+      FileList[File.join(game_root,'**/*.rb')].each { |ruby_file|
+        name_ruby_file = ruby_file.gsub(game_root, "").gsub(/^\//,"")
+        basename_ruby_file = name_ruby_file.gsub(/[^a-zA-Z0-9]+/,"_");
         game_file = {}
         name_for_require = 'game_'
         name_for_require += basename_ruby_file.to_s.chomp(File.extname(basename_ruby_file))
         game_file[:name_for_require] = name_for_require
-        game_file[:name] = basename_ruby_file.to_s.chomp(File.extname(basename_ruby_file))
+        game_file[:name] = name_ruby_file.to_s
         c_var_loaded = "%s_loaded" % name_for_require
 
         #@todo how option debug disable??
@@ -167,7 +167,7 @@ fgame_c << "void muruby_game_load(mrb_state *mrb, mrbc_context* cxt){
 fgame_c << " mrb_define_method(mrb, krn, \"load\", #{c_func_muruby_game_load}, MRB_ARGS_REQ(1));\n"
 #load Runtime
 fgame_c << ' cxt_global = cxt; '
-fgame_c << ' game_runtime_load(mrb); '
+fgame_c << ' game_runtime_rb_load(mrb); '
 fgame_c << "\n}\n"
 fgame_c.close
        sh "ndk-build -C %s main" % android_build_path
