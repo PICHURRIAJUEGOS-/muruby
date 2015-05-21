@@ -32,3 +32,25 @@ proguard/
 **.#**
 .bundle
 vendor/bundle
+### Ruby ###
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/test/tmp/
+/test/version_tmp/
+/tmp/
+
+## Specific to RubyMotion:
+.dat*
+.repl_history
+build/
+
+## Documentation cache and generated files:
+/.yardoc/
+/_yardoc/
+/doc/
+/rdoc/
