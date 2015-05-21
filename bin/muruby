@@ -398,7 +398,8 @@ module Muruby
       copy_file "game/runtime.rb", "#{name}/app/game/runtime.rb"
       copy_file "Rakefile", "#{name}/app/Rakefile"
       copy_file "Gemfile", "#{name}/app/Gemfile"
-          
+      copy_file ".gitignore.tmpl", "#{name}/app/.gitignore"
+      
       empty_directory "#{name}/app/resources"
       copy_file "doc/README_resources.md", "#{name}/app/resources/README.md"
 
