@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors = ['Jovany Leandro G.C']
   s.email = ['pichurriajuegos@gmail.com']
   s.files = ['bin/muruby']
-  s.files += Dir['skel/doc/*', 'skel/game/*', 'skel/*']
+  s.files += Dir['skel/doc/*', 'skel/game/*', 'skel/*', 'lib/*', 'lib/muruby/*', 'lib/muruby/tasks/*']
   #@todo recursive?
   s.files += FileList['skel/android-project/**/**/**/**/*']
   s.homepage = ''

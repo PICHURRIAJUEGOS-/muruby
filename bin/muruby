@@ -397,6 +397,7 @@ module Muruby
       copy_file "doc/README_game.md", "#{name}/app/game/README.md"
       copy_file "game/runtime.rb", "#{name}/app/game/runtime.rb"
       copy_file "Rakefile", "#{name}/app/Rakefile"
+      copy_file "Gemfile", "#{name}/app/Gemfile"
           
       empty_directory "#{name}/app/resources"
       copy_file "doc/README_resources.md", "#{name}/app/resources/README.md"
