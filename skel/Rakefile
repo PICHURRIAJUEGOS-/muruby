@@ -6,4 +6,4 @@ require 'bundler/setup' if File.exist?(ENV['BUNDLE_GEMFILE'])
 
 require 'muruby'
 
-Murubuy::Application.load_tasks
+Muruby::Application.load_tasks
