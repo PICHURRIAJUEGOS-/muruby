@@ -21,10 +21,9 @@ namespace :host do
     end
     bin_mruby = Muruby.paths[:mruby_mrdb].to_s
     FileUtils.rm_rf '.debug_run'
-    mkdir '.debug_run'
+    sh 'cp -fa %s .debug_run' % [Muruby.paths[:game_root]]
+    sh 'cp -fa %s/* .debug_run' % [Muruby.paths[:resource_root]]
     Dir.chdir('.debug_run') do
-      sh 'cp %s .' % [File.join(Muruby.paths[:game_root], '*.rb')]
-      sh 'cp %s .' % File.join(Muruby.paths[:resource_root], '*')
       sh("LD_LIBRARY_PATH=%s; %s  %s" % [File.dirname(Muruby.paths[:sdl_so]), bin_mruby, main_rb])
     end
     rmdir '.debug_run'
