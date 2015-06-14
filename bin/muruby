@@ -352,7 +352,7 @@ module Muruby
     class_option :enable_sdl_mixer, :type => :boolean, :default => false, :desc => "Not Implemented yet"
     class_option :enable_sdl_ttf, :type => :boolean, :default => false, :desc => "Not implemented yet"
     class_option :enable_sdl_image, :type => :boolean, :default => false, :desc => "Not implemented yet"
-    class_option :mruby_unstable, :type => :boolean, :default => true, :desc => "Use the master of mruby"
+    class_option :mruby_unstable, :type => :boolean, :default => false, :desc => "Use the master of mruby"
     class_option :dev_github_mruby_sdl2, :type => :string, :default => 'pichurriaj/mruby-sdl2', :desc => "Choose implementation mruby SDL2 on github, ex: pichurriaj/mruby-sdl2."
     class_option :build_android, :type => :boolean, :default => true, :desc => "Build android"
     method_option :package, :type => :string, :default => 'com.pichurriajuegos.muruby', :required => true, :banner => 'ej: com.pichurriajuegos.muruby the package'
