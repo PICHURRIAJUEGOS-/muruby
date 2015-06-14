@@ -91,7 +91,9 @@ module Build
   end
   
 
-  def _configure_mruby(app, mruby_path)
+  def _configure_mruby(app, mruby_path, options = {})
+    options[:dev_github_mruby_sdl2] ||= 'pichurriaj/mruby-sdl2'
+    
     gems_common = [
                    'mrbgems/mruby-math',
                    'mrbgems/mruby-enum-ext',
@@ -110,7 +112,7 @@ module Build
                   ]
     gems_base = [
                  {
-                   :github => 'pichurriaj/mruby-sdl2',
+                   :github => options[:dev_github_mruby_sdl2],
                    :branch => 'master',
                    :cc => {
                      'cc.include_paths' => [File.join(build_host_path, 'include')],
@@ -127,10 +129,11 @@ module Build
       { :github => 'iij/mruby-tempfile', :branch => 'master' },
       { :github => 'iij/mruby-require', :branch => 'master' }
     ]
-    
+
+
     gems_android = [
                     {
-                      :github => 'pichurriaj/mruby-sdl2',
+                      :github => options[:dev_github_mruby_sdl2],
                       :branch => 'master',
                       :cc => {
                         'cc.include_paths' => [File.join(build_host_path, 'include'),
@@ -350,6 +353,7 @@ module Muruby
     class_option :enable_sdl_ttf, :type => :boolean, :default => false, :desc => "Not implemented yet"
     class_option :enable_sdl_image, :type => :boolean, :default => false, :desc => "Not implemented yet"
     class_option :mruby_unstable, :type => :boolean, :default => true, :desc => "Use the master of mruby"
+    class_option :dev_github_mruby_sdl2, :type => :string, :default => 'pichurriaj/mruby-sdl2', :desc => "Choose implementation mruby SDL2 on github, ex: pichurriaj/mruby-sdl2."
     class_option :build_android, :type => :boolean, :default => true, :desc => "Build android"
     method_option :package, :type => :string, :default => 'com.pichurriajuegos.muruby', :required => true, :banner => 'ej: com.pichurriajuegos.muruby the package'
     desc 'create <app>', "Create a directory <name> structure with everything need for creating games for Android, and GNU/Linux.
@@ -358,7 +362,7 @@ module Muruby
       if options[:build_android]
         abort "Need enviroment variable ANDROID_NDK_HOME" unless ENV["ANDROID_NDK_HOME"]
       end
-
+      
       @@app_path =  File.absolute_path File.join(".", name)
       source_paths << _skel_root()
       _create_app(name)
@@ -444,7 +448,7 @@ module Muruby
       _configure_sdl2_ttf(name, sdl_path, sdl_ttf_path) if options[:enable_sdl_ttf]
       _configure_sdl2_mixer(name, sdl_path, sdl_mixer_path) if options[:enable_sdl_mixer]
 
-      _configure_mruby(name, mruby_path)
+      _configure_mruby(name, mruby_path, options.dup)
     end
 
     def _skel_root(path = nil)
