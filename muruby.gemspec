@@ -1,4 +1,4 @@
-require 'rake'
+
 Gem::Specification.new do |s|
   s.name = 'muruby'
   s.version = '0.0.0'
@@ -10,9 +10,10 @@ Gem::Specification.new do |s|
   s.files = ['bin/muruby']
   s.files += Dir['skel/doc/*', 'skel/game/*', 'skel/*', 'lib/*', 'lib/muruby/*', 'lib/muruby/tasks/*']
   #@todo recursive?
-  s.files += FileList['skel/android-project/**/**/**/**/*']
+  s.files = Dir['skel/android-project/**/**/**/**/*']
   s.homepage = ''
   s.license = 'MIT'
+  s.add_development_dependency "rake"
   s.add_development_dependency "rspec"
   s.add_development_dependency "thor"
   s.add_development_dependency "gettext"
