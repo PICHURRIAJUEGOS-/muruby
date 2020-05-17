@@ -21,7 +21,7 @@ module CacheDir
   
   def cache_directory(basename)
     local_file = File.join(cache_path, basename)
-    Dir.mkdir(cache_path) unless File.exists?(cache_path)
+    Dir.mkdir(cache_path) unless Dir.exists?(cache_path)
     yield(local_file)
   end
   
@@ -36,9 +36,10 @@ class Curl < SimpleDelegator
   def clone(dir, url, options = "")
     cache_directory(File.basename(url)) { |local_file|
       run("curl -C - %s -o %s %s" % [url, local_file, options])
-      run("tar -xzf %s" % [local_file])
-      run("mv %s %s" % [File.basename(url, ".tar.gz"), dir])
+      run("tar -xzf %s -C %s" % [local_file, dir])
     }
+  rescue => e
+    raise DownloadError.new(e.message)
   end
   
   def pull(dir)
@@ -51,15 +52,21 @@ class Git < SimpleDelegator
   
   def clone(dir, url, options = "")
     cache_directory(File.basename(dir)) {|local_path|
-      run("git clone %s %s %s" % [url, options, local_path])
-      run("git clone %s %s %s" % [local_path, options, dir])
+      out = run("git clone -q %s %s %s" % [url, options, local_path], :capture => true)
+      raise out if out.include?("fatal")
+      FileUtils.copy_entry(local_path, dir)
     }
+  rescue => e
+    raise DownloadError.new(e.message)
   end
   
   def pull(dir)
-    Dir.chdir(dir) do
-      run("git pull")
+    inside(dir) do
+      out = run("git pull -q", :capture => true)
+      raise out if out.include?("fatal")
     end
+  rescue => e
+    raise DownloadError.new(e.message)
   end
 end
 

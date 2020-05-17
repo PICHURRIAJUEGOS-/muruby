@@ -12,6 +12,43 @@ class TestApp < Thor
 
 end
 
+describe Curl do
+  before(:all) do
+    @dir =  Dir.mktmpdir.to_s
+    @curl = Curl.new(TestApp.new())
+  end
+
+  it "should clone url" do
+    expect { @curl.clone(@dir, 'https://fossil-scm.org/home/uv/fossil-linux-x64-2.11-beta-202005171633.tar.gz') }
+      .not_to raise_error(DownloadError)
+    expect(File.exists?(File.join(@dir, 'fossil'))).to be true
+  end
+end
+
+describe Git do
+  before(:all) do
+    @dir =  Dir.mktmpdir.to_s
+    @git = Git.new(TestApp.new())
+  end
+
+  it "should clone remote" do
+    expect { @git.clone(@dir, 'https://github.com/PICHURRIAJUEGOS-/muruby') }.not_to raise_error(DownloadError)
+    expect(File.exists?(File.join(@dir, 'Gemfile'))).to eq(true)
+  end
+
+  it "should pull remote" do
+    expect { @git.pull(@dir) }.not_to raise_error(DownloadError)
+  end
+  
+  it "should not clone remote" do
+    expect { @git.clone(@dir, 'http://bobos') }.to raise_error(DownloadError)
+  end
+
+  it "should not pull invalid" do
+    expect { @git.pull("/tmp") }.to raise_error(DownloadError)
+  end
+end
+
 describe Hg do
   before(:all) do
     @dir =  Dir.mktmpdir.to_s
@@ -19,8 +56,12 @@ describe Hg do
   end
   
   it "should clone remote to dir" do
-    @hg.clone(@dir, 'https://hg.tryton.org/cookiecutter/')
+    expect { @hg.clone(@dir, 'https://hg.tryton.org/cookiecutter/') }.not_to raise_error(DownloadError)
     expect(File.exists?(File.join(@dir, 'README.rst'))).to eq(true)
+  end
+
+  it 'should not clone remote' do
+    expect { @hg.clone(@dir, 'https://hg.tryton.org/cookiecuttera/') }.to raise_error(DownloadError)
   end
 
   it "should not pull invalid directory" do
