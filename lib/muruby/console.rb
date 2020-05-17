@@ -27,6 +27,9 @@ module CacheDir
   
 end
 
+class DownloadError < StandardError
+end
+
 class Curl < SimpleDelegator
   include CacheDir
   
@@ -63,15 +66,23 @@ end
 class Hg < SimpleDelegator
   include CacheDir
   
-  def clone(dir, url, options = {})
+  def clone(dir, url, options = "")
     cache_directory(File.basename(dir)) {|local_path|
-      run("hg clone %s %s %s" % [url, options, local_path])
-      run("hg clone %s %s %s" % [url, options, dir])
+      out = run("hg clone -q %s %s %s" % [url, options, local_path], :capture => true)
+      raise out if out.include?("abort")
+      FileUtils.copy_entry(local_path, dir)
     }
+  rescue => e
+    raise DownloadError.new(e.message)
   end
   
   def pull(dir)
-    run("hg pull %s" % [dir])
+    inside(dir) do
+        out = run("hg pull -q", :capture => true)
+        raise out if out.include?("abort")
+    end
+  rescue => e
+    raise DownloadError.new(e.message)
   end
 end
 
