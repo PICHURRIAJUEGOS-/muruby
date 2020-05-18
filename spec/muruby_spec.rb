@@ -5,15 +5,17 @@ require 'muruby/console'
 
 class TestApp < Thor
   include Thor::Actions
-  
-  def cache_path
-    File.join(Dir.tmpdir, 'app-cache')
-  end
+
+  no_commands {
+    def cache_path
+      File.join(Dir.tmpdir, 'app-cache')
+    end
+  }
 
 end
 
 describe Curl do
-  before(:all) do
+  before(:each) do
     @dir =  Dir.mktmpdir.to_s
     @curl = Curl.new(TestApp.new())
   end
@@ -23,6 +25,12 @@ describe Curl do
       .not_to raise_error(DownloadError)
     expect(File.exists?(File.join(@dir, 'fossil'))).to be true
   end
+
+  it "should clone remote url with custom name" do
+    expect { @curl.clone(@dir, 'https://codeload.github.com/SDL-mirror/SDL/zip/release-2.0.1', file_from: 'SDL-release-2.0.1', file_to: 'sdl2.zip') }.not_to raise_error(DownloadError)
+    expect(File.exists?(File.join(@dir, 'configure'))).to eq(true)
+  end
+
 end
 
 describe Git do
@@ -60,6 +68,7 @@ describe Hg do
     expect(File.exists?(File.join(@dir, 'README.rst'))).to eq(true)
   end
 
+  
   it 'should not clone remote' do
     expect { @hg.clone(@dir, 'https://hg.tryton.org/cookiecuttera/') }.to raise_error(DownloadError)
   end
