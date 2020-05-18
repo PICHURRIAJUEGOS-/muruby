@@ -376,7 +376,9 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
     #@todo how do recursive??
     run("rm -rf %s" % build_android_path)
     run("cp -ra %s %s" % [_skel_root('android-project'), build_android_path])
-    
+    inside(File.join(build_android_path, 'android-project')) do
+      run("patch -p1 < #{_skel_root('android-project.patch')}")
+    end
     sdl_android_path = File.join(build_android_path, 'jni', 'SDL')
     repo('curl').clone(sdl_android_path, $HG_REPO_SDL2['SDL'],
                        file_from: 'SDL-release-2.0.5',
