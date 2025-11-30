@@ -6,17 +6,13 @@ require 'rbconfig'
 require 'fileutils'
 require 'delegate'
 
-$GIT_REPO_MRUBY="git://github.com/mruby/mruby.git"
-$HG_REPO_SDL2= {
-#  'SDL' => "http://hg.libsdl.org/SDL",
+GIT_REPO_MRUBY = "git://github.com/mruby/mruby.git"
+HG_REPO_SDL2 = {
   'SDL' => 'https://codeload.github.com/SDL-mirror/SDL/zip/release-2.0.5',
-#  'SDL_image' => "http://hg.libsdl.org/SDL_image/",
   'SDL_image' => 'http://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.0.tar.gz',
-#  'SDL_mixer' => "http://hg.libsdl.org/SDL_mixer/",
   'SDL_mixer' => 'http://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.0.tar.gz',
-#  'SDL_ttf' => "http://hg.libsdl.org/SDL_ttf/"
   'SDL_ttf' => 'http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.12.tar.gz'
-}
+}.freeze
 
 module CacheDir
 
@@ -80,7 +76,7 @@ class Git < SimpleDelegator
       if Dir.exist?(local_path)
         pull(dir)
       else
-        out = run("git clone -q %s %s %s" % [url, options, local_path], :capture => true)
+        out = run("git clone -q %s %s %s" % [url, options, local_path], capture: true)
         raise out if out.include?("fatal")
         FileUtils.copy_entry(local_path, dir)
       end
@@ -91,10 +87,10 @@ class Git < SimpleDelegator
 
   def pull(dir)
     inside(dir) do
-      out = run("git pull -q", :capture => true)
+      out = run("git pull -q", capture: true)
       raise out if out.include?("fatal")
     end
-  rescue => e
+  rescue StandardError => e
     raise DownloadError.new(e.message)
   end
 end
@@ -107,7 +103,7 @@ class Hg < SimpleDelegator
       if Dir.exist?(local_path)
         pull(dir)
       else
-        out = run("hg clone -q %s %s %s" % [url, options, local_path], :capture => true)
+        out = run("hg clone -q %s %s %s" % [url, options, local_path], capture: true)
         raise out if out.include?("abort")
         FileUtils.copy_entry(local_path, dir)
       end
@@ -118,7 +114,7 @@ class Hg < SimpleDelegator
 
   def pull(dir)
     inside(dir) do
-        out = run("hg pull -q", :capture => true)
+        out = run("hg pull -q", capture: true)
         raise out if out.include?("abort")
     end
   rescue => e
@@ -207,7 +203,7 @@ class AndroidEnvironment < SimpleDelegator
   end
 
   def available_build_tools_version_sdk
-    sdk_manager('--list', :capture => true).lines
+    sdk_manager('--list', capture: true).lines
       .map(&:chomp)
       .map(&:strip)
       .select { |line| line.start_with?('build-tools;') }
@@ -272,7 +268,7 @@ module Build
   end
 
 
-  def _configure_mruby(app, mruby_path, options = {})
+  def _configure_mruby(app, mruby_path, **options)
     options[:dev_github_mruby_sdl2] ||= 'mruby-sdl2/mruby-sdl2'
 
     gems_common = [
@@ -293,9 +289,9 @@ module Build
                   ]
     gems_base = [
                  {
-                   :github => options[:dev_github_mruby_sdl2],
-                   :branch => 'master',
-                   :cc => {
+                   github: options[:dev_github_mruby_sdl2],
+                   branch: 'master',
+                   cc: {
                      'cc.include_paths' => [File.join(build_host_path, 'include'),
                                             File.join(build_host_path, 'include', 'SDL2')],
                      'linker.libraries' => ['SDL2'],
@@ -306,31 +302,25 @@ module Build
                  'mrbgems/mruby-bin-mirb',
                  'mrbgems/mruby-bin-mruby'
     ] | gems_common | [
-      { :github => 'iij/mruby-dir', :branch => 'master' },
-      { :github => 'iij/mruby-io', :branch => 'master' },
-      { :github => 'iij/mruby-tempfile', :branch => 'master' },
-      { :github => 'iij/mruby-require', :branch => 'master' }
+      { github: 'iij/mruby-dir', branch: 'master' },
+      { github: 'iij/mruby-io', branch: 'master' },
+      { github: 'iij/mruby-tempfile', branch: 'master' },
+      { github: 'iij/mruby-require', branch: 'master' }
     ]
 
 
     gems_android = [
                     {
-                      :github => options[:dev_github_mruby_sdl2],
-                      :branch => 'master',
-                      :cc => {
+                      github: options[:dev_github_mruby_sdl2],
+                      branch: 'master',
+                      cc: {
                         'cc.include_paths' => [File.join(build_host_path, 'include'),
                                                File.join(build_host_path, 'include', 'SDL2'),
                                                File.join(ENV['ANDROID_NDK_HOME'], 'sources/android/support/include/'),
                                               ],
-                        #'linker.libraries' => [%w(SDL2)],
-                        #'linker.library_paths' => [File.join(build_android_path, 'libs', 'armeabi')]
                       },
 
                     },
-                    #{
-                    #  :github => 'pichurriaj/mruby-print-android',
-                    #  :branch => 'master'
-                    #}
                 ] | gems_common
 
     _configure_mruby_host(mruby_path, gems_base)
@@ -357,11 +347,11 @@ module Build
 
   def _configure_mruby_android(mruby_path, gems_base)
     key_to_append = "#AUTOMATIC GEMS ANDROID --NO EDIT--\n"
-    insert_into_file File.join(mruby_path, 'build_config.rb'), :after => "# Define cross build settings\n" do
+    insert_into_file File.join(mruby_path, 'build_config.rb'), after: "# Define cross build settings\n" do
       out = "#AUTOMATIC CROSSBUILD ANDROID\n"
       out += "MRuby::CrossBuild.new('android-armeabi') do |conf|\n"
       out += %Q{
-params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
+params = { arch: 'armeabi', platform: 'android-24', toolchain: :clang }
 }
       out += "toolchain :android, params\n"
       out += "conf.cc.flags = %w(-Wwrite-strings)\n"
@@ -381,27 +371,27 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
       run("patch -p1 < #{_skel_root('android-project.patch')}")
     end
     sdl_android_path = File.join(build_android_path, 'jni', 'SDL')
-    repo('curl').clone(sdl_android_path, $HG_REPO_SDL2['SDL'],
+    repo('curl').clone(sdl_android_path, HG_REPO_SDL2['SDL'],
                        file_from: 'SDL-release-2.0.5',
                        file_to: 'SDL2-2.0.5.zip')  unless File.directory?(sdl_android_path)
 
     if options[:enable_sdl_image]
       sdl_image_android_path = File.join(build_android_path, 'jni', 'SDL_image')
-      repo('curl').clone(sdl_image_android_path, $HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_android_path)
+      repo('curl').clone(sdl_image_android_path, HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_android_path)
       sdl_image_android_path_mk = File.join(sdl_image_android_path, 'Android.mk')
       gsub_file sdl_image_android_path_mk, "SUPPORT_WEBP := true", "SUPPORT_WEBP := false"
     end
 
     if options[:enable_sdl_ttf]
       sdl_ttf_android_path = File.join(build_android_path, 'jni', 'SDL_ttf')
-      repo('curl').clone(sdl_ttf_android_path, $HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_android_path)
+      repo('curl').clone(sdl_ttf_android_path, HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_android_path)
       sdl_ttf_android_path_mk = File.join(sdl_ttf_android_path, 'Android.mk')
       gsub_file sdl_ttf_android_path_mk, "SUPPORT_JPG := true", "SUPPORT_JPG := false"
     end
 
     if options[:enable_sdl_mixer]
       sdl_mixer_android_path = File.join(build_android_path, 'jni', 'SDL_mixer')
-      repo('curl').clone(sdl_mixer_android_path, $HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_android_path)
+      repo('curl').clone(sdl_mixer_android_path, HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_android_path)
 
       sdl_mixer_android_path_mk = File.join(sdl_mixer_android_path, 'Android.mk')
       gsub_file sdl_mixer_android_path_mk, "SUPPORT_MOD_MODPLUG := true", "SUPPORT_MOD_MODPLUG := false"
@@ -413,12 +403,12 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
 
   def _mruby_update_build_conf(mruby_path, gems_base, after, tag = "")
 
-    insert_into_file File.join(mruby_path,"build_config.rb"), :after => after do
+    insert_into_file File.join(mruby_path,"build_config.rb"), after: after do
       gems_base.map do |gem|
         case gem
         when Hash
           out = tag
-          out += "\nconf.gem :github => '%s', :branch => '%s' " % [gem[:github], gem[:branch]]
+          out += "\nconf.gem github: '%s', branch: '%s' " % [gem[:github], gem[:branch]]
           if gem[:cc]
             out += "do |g|\n"
             out += gem[:cc].map{|k,v|
@@ -445,7 +435,7 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
     say("compiling %s for host" % sdl_path)
     @sdl_path = sdl_path
     sdl_lib_path = File.join(build_host_path, 'lib', 'libSDL2.so')
-    if File.exists?(sdl_lib_path)
+    if File.exist?(sdl_lib_path)
       say("Skipping SDL2...")
       return
     end
@@ -453,12 +443,12 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
       #simulate system install
       run("mkdir include/SDL2")
       run("cp -ra include/* include/SDL2/")
-      run("./configure --prefix=%s" % build_host_path, :capture => false)
-      run("make")
+      run("./configure --prefix=%s" % build_host_path, capture: false)
+      run("make -j")
       run("make install")
       run("make clean")
     end
-    if !File.exists?(sdl_lib_path)
+    if !File.exist?(sdl_lib_path)
       raise RuntimeError, "Failed Compiling SDL2, build manually %s" % sdl_path
     end
   end
@@ -467,18 +457,18 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
     #compile for host
     say("compiling %s for host" % sdl_image_path)
     sdl_image_lib_path = File.join(build_host_path, 'lib', 'libSDL2_image.so')
-    if File.exists?(sdl_image_lib_path)
+    if File.exist?(sdl_image_lib_path)
       say("Skipping SDL2 image..")
       return
     end
     inside(sdl_image_path) do
       run("./autogen.sh")
-      run("./configure --prefix=%s --with-sdl-prefix=%s" % [build_host_path, build_host_path], :capture => false)
+      run("./configure --prefix=%s --with-sdl-prefix=%s" % [build_host_path, build_host_path], capture: false)
       run("make")
       run("make install")
       run("make clean")
     end
-    if !File.exists?(sdl_image_lib_path)
+    if !File.exist?(sdl_image_lib_path)
       raise RuntimeError, "Failed Compiling SDL2 image, build manually %s" % sdl_image_path
     end
   end
@@ -487,18 +477,18 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
     #compile for host
     say("compiling %s for host" % sdl_ttf_path)
     sdl_ttf_lib_path = File.join(build_host_path, 'lib', 'libSDL2_ttf.so')
-    if File.exists?(sdl_ttf_lib_path)
+    if File.exist?(sdl_ttf_lib_path)
       say("Skipping SDL2 ttf...")
       return
     end
     inside(sdl_ttf_path) do
       run("./autogen.sh")
-      run("./configure --prefix=%s --with-sdl-prefix=%s" % [build_host_path, build_host_path], :capture => false)
+      run("./configure --prefix=%s --with-sdl-prefix=%s" % [build_host_path, build_host_path], capture: false)
       run("make")
       run("make install")
       run("make clean")
     end
-    if !File.exists?(sdl_ttf_lib_path)
+    if !File.exist?(sdl_ttf_lib_path)
       raise RuntimeError, "Failed Compiling SDL2 ttf build manually %s" % sdl_ttf_path
     end
 
@@ -508,18 +498,18 @@ params = { :arch => 'armeabi', :platform => 'android-24', :toolchain => :clang }
     #compile for host
     say("compiling %s for host" % sdl_mixer_path)
     sdl_mixer_lib_path = File.join(build_host_path, 'lib', 'libSDL2_mixer.so')
-    if File.exists?(sdl_mixer_lib_path)
+    if File.exist?(sdl_mixer_lib_path)
       say("Skipping SDL2 mixer...")
       return
     end
 
     inside(sdl_mixer_path) do
       run("./autogen.sh")
-      run("./configure --prefix=%s --with-sdl-prefix=%s" % [build_host_path, build_host_path], :capture => false)
+      run("./configure --prefix=%s --with-sdl-prefix=%s" % [build_host_path, build_host_path], capture: false)
       run("make")
       run("make install")
     end
-    if !File.exists?(sdl_mixer_lib_path)
+    if !File.exist?(sdl_mixer_lib_path)
       raise RuntimeError, "Failed Compiling SDL2 mixer, build manually %s" % sdl_mixer_path
     end
 
@@ -534,15 +524,15 @@ module Muruby
 
     @@app_path = nil
     def self.source_root
-      File.dirname(__FILE__)
+      __dir__
     end
 
     def exit_on_failure?
       true
     end
 
-    class_option :ndk_dir, :type => :string, :default => File.join(ENV["HOME"], '.muruby_android_ndk')
-    class_option :sdk_dir, :type => :string, :default => File.join(ENV["HOME"], '.muruby_android_sdk')
+    class_option :ndk_dir, type: :string, default: File.join(ENV["HOME"], '.muruby_android_ndk')
+    class_option :sdk_dir, type: :string, default: File.join(ENV["HOME"], '.muruby_android_sdk')
     desc 'install-android-environment', 'install android environment'
     def install_android_environment
       @android = AndroidEnvironment.new(self, options[:sdk_dir], options[:ndk_dir])
@@ -550,13 +540,13 @@ module Muruby
       puts "export ANDROID_NDK_HOME=#{@android.android_ndk_dir}"
     end
 
-    class_option :enable_sdl_mixer, :type => :boolean, :default => false, :desc => "Not Implemented yet"
-    class_option :enable_sdl_ttf, :type => :boolean, :default => false, :desc => "Not implemented yet"
-    class_option :enable_sdl_image, :type => :boolean, :default => false, :desc => "Not implemented yet"
-    class_option :mruby_unstable, :type => :boolean, :default => false, :desc => "Use the master of mruby"
-    class_option :dev_github_mruby_sdl2, :type => :string, :default => 'mruby-sdl2/mruby-sdl2', :desc => "Choose implementation mruby SDL2 on github, ex: mruby-sdl2/mruby-sdl2."
-    class_option :build_android, :type => :boolean, :default => true, :desc => "Build android"
-    method_option :package, :type => :string, :default => 'com.pichurriajuegos.muruby', :required => true, :banner => 'ej: com.pichurriajuegos.muruby the package'
+    class_option :enable_sdl_mixer, type: :boolean, default: false, desc: "Not Implemented yet"
+    class_option :enable_sdl_ttf, type: :boolean, default: false, desc: "Not implemented yet"
+    class_option :enable_sdl_image, type: :boolean, default: false, desc: "Not implemented yet"
+    class_option :mruby_unstable, type: :boolean, default: false, desc: "Use the master of mruby"
+    class_option :dev_github_mruby_sdl2, type: :string, default: 'mruby-sdl2/mruby-sdl2', desc: "Choose implementation mruby SDL2 on github, ex: mruby-sdl2/mruby-sdl2."
+    class_option :build_android, type: :boolean, default: true, desc: "Build android"
+    method_option :package, type: :string, default: 'com.pichurriajuegos.muruby', required: true, banner: 'ej: com.pichurriajuegos.muruby the package'
     desc 'create <app>', "Create a directory <name> structure with everything need for creating games for Android, and GNU/Linux.
 "
     def create(name)
@@ -615,21 +605,20 @@ module Muruby
     def _create_core(name)
       empty_directory "#{name}/core"
 
-      #download sources
       sdl_path = "#{name}/core/SDL2"
-      repo('curl').clone(sdl_path, $HG_REPO_SDL2['SDL'],
+      repo('curl').clone(sdl_path, HG_REPO_SDL2['SDL'],
                          file_from: 'SDL-release-2.0.5',
-                         file_to: 'SDL2-2.0.5.zip') unless File.directory?(sdl_path)
-      sdl_image_path = "#{name}/core/SDL2_image"
-      repo('curl').clone(sdl_image_path, $HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_path) if options[:enable_sdl_image]
-      sdl_ttf_path = "#{name}/core/SDL2_ttf"
-      repo('curl').clone(sdl_ttf_path, $HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_path) if options[:enable_sdl_ttf]
-      sdl_mixer_path = "#{name}/core/SDL2_mixer"
-      repo('curl').clone(sdl_mixer_path, $HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_path) if options[:enable_sdl_mixer]
+                         file_to: 'SDL2-2.0.5.zip')  unless File.directory?(sdl_path)
+        sdl_image_path = "#{name}/core/SDL2_image"
+        repo('curl').clone(sdl_image_path, HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_path) if options[:enable_sdl_image]
+        sdl_ttf_path = "#{name}/core/SDL2_ttf"
+        repo('curl').clone(sdl_ttf_path, HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_path) if options[:enable_sdl_ttf]
+        sdl_mixer_path = "#{name}/core/SDL2_mixer"
+        repo('curl').clone(sdl_mixer_path, HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_path) if options[:enable_sdl_mixer]
 
       mruby_path = "#{name}/core/mruby"
       unless File.directory?(mruby_path)
-        repo('git').clone(mruby_path, $GIT_REPO_MRUBY)
+        repo('git').clone(mruby_path, GIT_REPO_MRUBY)
       end
       inside(mruby_path) do
         unless options[:mruby_unstable]
@@ -657,7 +646,7 @@ module Muruby
         spec = Gem::Specification.find_by_name("muruby")
         gem_dir = spec.gem_dir
       rescue Gem::MissingSpecError
-        gem_dir = File.absolute_path File.join(File.expand_path(File.dirname(__FILE__)), '..', '..')
+        gem_dir = File.absolute_path File.join(File.expand_path(__dir__), '..', '..')
       end
 
       if path
@@ -672,7 +661,7 @@ module Muruby
     include Thor::Actions
 
     def self.source_root
-      File.dirname(__FILE__)
+      __dir__
     end
   end
 
@@ -680,7 +669,7 @@ module Muruby
   class Gnu < Thor
     include Thor::Actions
     def self.source_root
-      File.dirname(__FILE__)
+      __dir__
     end
   end
 
