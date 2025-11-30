@@ -1,4 +1,5 @@
 #!/bin/env ruby
+# LLM-Assisted
 require 'muruby/console'
 
 if __FILE__ == $0

@@ -1,4 +1,5 @@
 
+# LLM-Assisted
 Gem::Specification.new do |s|
   s.name = 'muruby'
   s.homepage = 'http://bit4bit.somxslibres.net'
@@ -8,6 +9,7 @@ Gem::Specification.new do |s|
   s.description = 'Game Engine for Android and GNU/Linux using mruby'
   s.authors = ['Jovany Leandro G.C']
   s.email = ['pichurriajuegos@gmail.com']
+  s.required_ruby_version = '>= 3.0.0'
   s.files += ['bin/muruby']
   s.files += Dir['lib/*', 'skel/doc/*', 'skel/game/*', 'skel/*', 'lib/*', 'lib/muruby/*', 'lib/muruby/tasks/*']
   s.files += Dir['skel/android-project/**/**/**/**/*']
