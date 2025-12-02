@@ -1,4 +1,3 @@
-# LLM-Assisted
 require 'rubygems'
 require 'thor'
 require 'gettext'
@@ -6,12 +5,12 @@ require 'rbconfig'
 require 'fileutils'
 require 'delegate'
 
-GIT_REPO_MRUBY = "git://github.com/mruby/mruby.git"
+GIT_REPO_MRUBY = "git@github.com:mruby/mruby.git"
 HG_REPO_SDL2 = {
-  'SDL' => 'https://codeload.github.com/SDL-mirror/SDL/zip/release-2.0.5',
-  'SDL_image' => 'http://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.0.tar.gz',
-  'SDL_mixer' => 'http://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.0.tar.gz',
-  'SDL_ttf' => 'http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.12.tar.gz'
+  'SDL' => 'https://github.com/libsdl-org/SDL/releases/download/release-2.32.8/SDL2-2.32.8.tar.gz',
+  'SDL_image' => 'https://github.com/libsdl-org/SDL_image/releases/download/prerelease-2.7.1/SDL2_image-2.7.1.tar.gz',
+  'SDL_mixer' => 'https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-2.8.1.tar.gz',
+  'SDL_ttf' => 'https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-2.22.0.tar.gz'
 }.freeze
 
 module CacheDir
@@ -37,7 +36,7 @@ class Curl < Download
     file_to = File.basename(url) if file_to.nil?
 
     cache_directory(file_to) { |local_file|
-      run("curl -C - %s -o %s" % [url, local_file])
+      run("curl -L -C - %s -o %s" % [url, local_file])
 
       case
       when local_file.end_with?("zip")
@@ -78,8 +77,9 @@ class Git < SimpleDelegator
       else
         out = run("git clone -q %s %s %s" % [url, options, local_path], capture: true)
         raise out if out.include?("fatal")
-        FileUtils.copy_entry(local_path, dir)
       end
+
+      FileUtils.copy_entry(local_path, dir)
     }
   rescue => e
     raise DownloadError.new(e.message)
@@ -114,8 +114,8 @@ class Hg < SimpleDelegator
 
   def pull(dir)
     inside(dir) do
-        out = run("hg pull -q", capture: true)
-        raise out if out.include?("abort")
+      out = run("hg pull -q", capture: true)
+      raise out if out.include?("abort")
     end
   rescue => e
     raise DownloadError.new(e.message)
@@ -125,9 +125,7 @@ end
 class ShellError < StandardError
 end
 
-class Shell < Thor
-  include Thor::Actions
-
+class Shell
   attr_accessor :env
   attr_accessor :raise_on_run_fail
 
@@ -183,7 +181,7 @@ class AndroidEnvironment < SimpleDelegator
     current_shell_env = @shell.env.clone
     @shell.env = @env
     begin
-        yield @shell
+      yield @shell
     ensure
       @shell.env = current_shell_env
     end
@@ -268,39 +266,39 @@ module Build
   end
 
 
-  def _configure_mruby(app, mruby_path, **options)
+  def _configure_mruby(app, mruby_path, options = {})
     options[:dev_github_mruby_sdl2] ||= 'mruby-sdl2/mruby-sdl2'
 
     gems_common = [
-                   'mrbgems/mruby-math',
-                   'mrbgems/mruby-enum-ext',
-                   'mrbgems/mruby-random',
-                   'mrbgems/mruby-proc-ext',
-                   'mrbgems/mruby-exit',
-                   'mrbgems/mruby-fiber',
-                   'mrbgems/mruby-struct',
-                   'mrbgems/mruby-sprintf',
-                   'mrbgems/mruby-string-ext',
-                   'mrbgems/mruby-object-ext',
-                   'mrbgems/mruby-array-ext',
-                   'mrbgems/mruby-hash-ext',
-                   'mrbgems/mruby-symbol-ext',
-                   'mrbgems/mruby-eval'
-                  ]
+      'mrbgems/mruby-math',
+      'mrbgems/mruby-enum-ext',
+      'mrbgems/mruby-random',
+      'mrbgems/mruby-proc-ext',
+      'mrbgems/mruby-exit',
+      'mrbgems/mruby-fiber',
+      'mrbgems/mruby-struct',
+      'mrbgems/mruby-sprintf',
+      'mrbgems/mruby-string-ext',
+      'mrbgems/mruby-object-ext',
+      'mrbgems/mruby-array-ext',
+      'mrbgems/mruby-hash-ext',
+      'mrbgems/mruby-symbol-ext',
+      'mrbgems/mruby-eval'
+    ]
     gems_base = [
-                 {
-                   github: options[:dev_github_mruby_sdl2],
-                   branch: 'master',
-                   cc: {
-                     'cc.include_paths' => [File.join(build_host_path, 'include'),
-                                            File.join(build_host_path, 'include', 'SDL2')],
-                     'linker.libraries' => ['SDL2'],
-                     'linker.library_paths' => [File.join(build_host_path, 'lib')]
-                   }
-                 },
-                 'mrbgems/mruby-print',
-                 'mrbgems/mruby-bin-mirb',
-                 'mrbgems/mruby-bin-mruby'
+      {
+        github: options[:dev_github_mruby_sdl2],
+        branch: 'master',
+        cc: {
+          'cc.include_paths' => [File.join(build_host_path, 'include'),
+                                 File.join(build_host_path, 'include', 'SDL2')],
+          'linker.libraries' => ['SDL2'],
+          'linker.library_paths' => [File.join(build_host_path, 'lib')]
+        }
+      },
+      'mrbgems/mruby-print',
+      'mrbgems/mruby-bin-mirb',
+      'mrbgems/mruby-bin-mruby'
     ] | gems_common | [
       { github: 'iij/mruby-dir', branch: 'master' },
       { github: 'iij/mruby-io', branch: 'master' },
@@ -310,18 +308,18 @@ module Build
 
 
     gems_android = [
-                    {
-                      github: options[:dev_github_mruby_sdl2],
-                      branch: 'master',
-                      cc: {
-                        'cc.include_paths' => [File.join(build_host_path, 'include'),
-                                               File.join(build_host_path, 'include', 'SDL2'),
-                                               File.join(ENV['ANDROID_NDK_HOME'], 'sources/android/support/include/'),
-                                              ],
-                      },
+      {
+        github: options[:dev_github_mruby_sdl2],
+        branch: 'master',
+        cc: {
+          'cc.include_paths' => [File.join(build_host_path, 'include'),
+                                 File.join(build_host_path, 'include', 'SDL2'),
+                                 File.join(ENV['ANDROID_NDK_HOME'], 'sources/android/support/include/'),
+                                ],
+        },
 
-                    },
-                ] | gems_common
+      },
+    ] | gems_common
 
     _configure_mruby_host(mruby_path, gems_base)
     _configure_mruby_android(mruby_path, gems_android) if options[:build_android]
@@ -372,8 +370,8 @@ params = { arch: 'armeabi', platform: 'android-24', toolchain: :clang }
     end
     sdl_android_path = File.join(build_android_path, 'jni', 'SDL')
     repo('curl').clone(sdl_android_path, HG_REPO_SDL2['SDL'],
-                       file_from: 'SDL-release-2.0.5',
-                       file_to: 'SDL2-2.0.5.zip')  unless File.directory?(sdl_android_path)
+                       file_from: 'SDL2-2.32.8',
+                       file_to: 'SDL2-2.32.8.tar.gz')  unless File.directory?(sdl_android_path)
 
     if options[:enable_sdl_image]
       sdl_image_android_path = File.join(build_android_path, 'jni', 'SDL_image')
@@ -442,7 +440,7 @@ params = { arch: 'armeabi', platform: 'android-24', toolchain: :clang }
     inside(sdl_path) do
       #simulate system install
       run("mkdir include/SDL2")
-      run("cp -ra include/* include/SDL2/")
+      run("cp -rfa include/*.h include/SDL2/")
       run("./configure --prefix=%s" % build_host_path, capture: false)
       run("make -j")
       run("make install")
@@ -527,7 +525,7 @@ module Muruby
       __dir__
     end
 
-    def exit_on_failure?
+    def self.exit_on_failure?
       true
     end
 
@@ -607,14 +605,14 @@ module Muruby
 
       sdl_path = "#{name}/core/SDL2"
       repo('curl').clone(sdl_path, HG_REPO_SDL2['SDL'],
-                         file_from: 'SDL-release-2.0.5',
-                         file_to: 'SDL2-2.0.5.zip')  unless File.directory?(sdl_path)
-        sdl_image_path = "#{name}/core/SDL2_image"
-        repo('curl').clone(sdl_image_path, HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_path) if options[:enable_sdl_image]
-        sdl_ttf_path = "#{name}/core/SDL2_ttf"
-        repo('curl').clone(sdl_ttf_path, HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_path) if options[:enable_sdl_ttf]
-        sdl_mixer_path = "#{name}/core/SDL2_mixer"
-        repo('curl').clone(sdl_mixer_path, HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_path) if options[:enable_sdl_mixer]
+                         file_from: 'SDL2-2.32.8',
+                         file_to: 'SDL2-2.32.8.tar.gz')  unless File.directory?(sdl_path)
+      sdl_image_path = "#{name}/core/SDL2_image"
+      repo('curl').clone(sdl_image_path, HG_REPO_SDL2['SDL_image']) unless File.directory?(sdl_image_path) if options[:enable_sdl_image]
+      sdl_ttf_path = "#{name}/core/SDL2_ttf"
+      repo('curl').clone(sdl_ttf_path, HG_REPO_SDL2['SDL_ttf']) unless File.directory?(sdl_ttf_path) if options[:enable_sdl_ttf]
+      sdl_mixer_path = "#{name}/core/SDL2_mixer"
+      repo('curl').clone(sdl_mixer_path, HG_REPO_SDL2['SDL_mixer']) unless File.directory?(sdl_mixer_path) if options[:enable_sdl_mixer]
 
       mruby_path = "#{name}/core/mruby"
       unless File.directory?(mruby_path)
@@ -631,7 +629,6 @@ module Muruby
       #mruby-require
 
       #configure apps
-
       _configure_sdl2(name, sdl_path)
       _configure_sdl2_image(name, sdl_path,  sdl_image_path) if options[:enable_sdl_image]
       _configure_sdl2_ttf(name, sdl_path, sdl_ttf_path) if options[:enable_sdl_ttf]
@@ -674,3 +671,4 @@ module Muruby
   end
 
 end
+Muruby::Game.start

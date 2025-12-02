@@ -11,13 +11,13 @@ Gem::Specification.new do |s|
   s.email = ['pichurriajuegos@gmail.com']
   s.required_ruby_version = '>= 3.0.0'
   s.files += ['bin/muruby']
-  s.files += Dir['lib/*', 'skel/doc/*', 'skel/game/*', 'skel/*', 'lib/*', 'lib/muruby/*', 'lib/muruby/tasks/*']
+  s.files += Dir['lib/*', 'skel/doc/*', 'skel/game/*', 'skel/*', 'skel/.gitignore.tmpl', 'lib/*', 'lib/muruby/*', 'lib/muruby/tasks/*']
   s.files += Dir['skel/android-project/**/**/**/**/*']
   s.homepage = ''
   s.license = 'MIT'
+  s.add_dependency "thor", '~> 1.4'
+  s.add_dependency 'gettext', '~> 3.5', '>= 3.5.1'
   s.add_development_dependency "rake", '~> 0'
   s.add_development_dependency "rspec", '~> 0'
-  s.add_development_dependency "thor", '~> 0'
-  s.add_development_dependency "gettext", '~> 0'
   s.executables << "muruby"
 end

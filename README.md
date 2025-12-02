@@ -16,9 +16,10 @@ Y principalmente el *mrgem* *SDL2*.
 ## TUTORIAL
 
   * Clonar el repositorio: "git clone https://www.github.com/pichurriaj/muruby"
+  * Dependencias `apt install libxext-dev`
   * Compilar el gem e instalar
     * *gem build muruby.gemspec*
-	* *gem install muruby-\*.gem*
+  	* *gem install muruby-\*.gem*
   * Crear aplicacion: *muruby create tutorial --package=org.prueba.tutorial*
     * esto necesita internet para descargar dependencias ademas de: gcc, autoconf, automake, libtool..etc.
   * el juego se crea en app/game/*.rb
@@ -77,4 +78,4 @@ algunos proyectos base:
 
   * crimsonwoods/mruby-sdl2
   * mruby/mruby
-  * y todos por contribuir y compartir el software libre.  
+  * y todos por contribuir y compartir el software libre.
